@@ -1,0 +1,203 @@
+{
+	"info": {
+		"_postman_id": "a9d701fc-1122-4433-8899-abcdef123456",
+		"name": "Vehicle Management REST API",
+		"description": "Postman collection for Vehicle Management CRUD REST API built with Spring Boot and MySQL.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Vehicles",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/vehicles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"vehicles"
+					]
+				},
+				"description": "Retrieve all vehicle records from MySQL."
+			},
+			"response": []
+		},
+		{
+			"name": "Search Vehicles by Query",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/vehicles?search=Tata",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"vehicles"
+					],
+					"query": [
+						{
+							"key": "search",
+							"value": "Tata"
+						}
+					]
+				},
+				"description": "Search vehicles by keyword across Make, Model, VIN, Plate, or Owner."
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Vehicles by Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/vehicles?status=In Progress",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"vehicles"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "In Progress"
+						}
+					]
+				},
+				"description": "Filter vehicle records by service status (Pending, In Progress, Completed, Delivered)."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Vehicle by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/vehicles/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"vehicles",
+						"1"
+					]
+				},
+				"description": "Retrieve a specific vehicle record by its primary key ID."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Vehicle Statistics",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/vehicles/stats",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"vehicles",
+						"stats"
+					]
+				},
+				"description": "Fetch aggregated counts of vehicles by service status."
+			},
+			"response": []
+		},
+		{
+			"name": "Create New Vehicle (POST)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"vin\": \"MAT621354N9988776\",\n  \"make\": \"Tata\",\n  \"model\": \"Harrier Dark Edition\",\n  \"year\": 2023,\n  \"licensePlate\": \"MH 12 QP 5544\",\n  \"ownerName\": \"Zoya Kapoor\",\n  \"ownerContact\": \"+91 98450 11223\",\n  \"serviceStatus\": \"Pending\",\n  \"mileage\": 11200,\n  \"notes\": \"General service and brake inspection\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/vehicles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"vehicles"
+					]
+				},
+				"description": "Create a new vehicle record in the database."
+			},
+			"response": []
+		},
+		{
+			"name": "Update Vehicle by ID (PUT)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"vin\": \"MAT621354N1234567\",\n  \"make\": \"Tata\",\n  \"model\": \"Nexon EV\",\n  \"year\": 2023,\n  \"licensePlate\": \"MH 02 FA 8821\",\n  \"ownerName\": \"Aarav Mehta\",\n  \"ownerContact\": \"+91 98201 14523\",\n  \"serviceStatus\": \"Completed\",\n  \"mileage\": 14600,\n  \"notes\": \"Battery diagnostics and brake pad replacement completed successfully.\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/vehicles/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"vehicles",
+						"1"
+					]
+				},
+				"description": "Update an existing vehicle record by its ID."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Vehicle by ID (DELETE)",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/vehicles/5",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"vehicles",
+						"5"
+					]
+				},
+				"description": "Delete a vehicle record from the database by its ID."
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
