@@ -1,7 +1,25 @@
-// Support environment variable (for Vercel/production), Vite dev proxy, and direct localhost backend
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL 
-  || (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api/vehicles` : null)
-  || (window.location.port === '5173' ? '/api/vehicles' : 'http://localhost:8080/api/vehicles');
+// Resolve the API base URL robustly across environments and formatting
+function resolveApiBaseUrl() {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL.trim().replace(/\/$/, '');
+  }
+  if (import.meta.env.VITE_API_URL) {
+    const raw = import.meta.env.VITE_API_URL.trim().replace(/\/$/, '');
+    if (raw.endsWith('/api/vehicles')) return raw;
+    if (raw.endsWith('/api')) return `${raw}/vehicles`;
+    return `${raw}/api/vehicles`;
+  }
+  return window.location.port === '5173' ? '/api/vehicles' : 'http://localhost:8080/api/vehicles';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
+
+if (typeof window !== 'undefined') {
+  console.log('[VehicleService] Target API URL:', API_BASE_URL);
+  if (API_BASE_URL.includes('localhost') && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    console.warn('[VehicleService] Warning: The frontend is running on a live host (' + window.location.hostname + ') but attempting to connect to localhost backend. Please set the VITE_API_URL environment variable in your host settings.');
+  }
+}
 
 export const vehicleService = {
   async getAllVehicles(search = '', status = 'ALL') {

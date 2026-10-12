@@ -47,7 +47,14 @@ export default function App() {
       setVehicles(vehicleList);
       setStats(statsData);
     } catch (err) {
-      showNotification(err.message || 'Error connecting to backend server', 'error');
+      const isLiveFrontend = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      let errorMsg = err.message || 'Error connecting to backend server';
+      if (err.message && err.message.toLowerCase().includes('failed to fetch')) {
+        errorMsg = isLiveFrontend
+          ? 'Failed to fetch data: Cannot reach backend server. Please verify VITE_API_URL in Vercel settings and ensure your Render backend is running.'
+          : 'Failed to fetch data: Local backend is not reachable at http://localhost:8080.';
+      }
+      showNotification(errorMsg, 'error');
     } finally {
       setLoading(false);
     }
