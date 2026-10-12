@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Service Management</title>
+  <style>
+    /* ===================================================
+       Vehicle Management - Live Server UI
+       Public Read-Only + Protected Admin Controls
+       Zero Animations, No Transitions, Completely Offline Ready
+       =================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: none !important;
+      animation: none !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f3f4f6;
+      color: #111827;
+      line-height: 1.5;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .app-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: #1e293b;
+      color: #ffffff;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #0f172a;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .navbar-brand h1 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Main Container */
+    .main-content {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* Notifications */
+    .alert {
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      font-size: 14px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .alert-success {
+      background-color: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .alert-error {
+      background-color: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .alert-info {
+      background-color: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .alert-close {
+      background: none;
+      border: none;
+      color: inherit;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 1;
+      padding-left: 8px;
+    }
+
+    /* Role Notice Banner */
+    .role-banner {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #2563eb;
+      padding: 10px 16px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #475569;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .role-banner.admin-mode {
+      border-left-color: #16a34a;
+      background-color: #f0fdf4;
+      color: #166534;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .stat-card h3 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* Controls */
+    .control-bar {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .search-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 240px;
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      background-color: #ffffff;
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      background-color: #ffffff;
+      min-width: 160px;
+    }
+
+    .search-input:focus, .filter-select:focus, .form-control:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px #2563eb;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background-color: #2563eb;
+      color: #ffffff;
+      border-color: #1d4ed8;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background-color: #f1f5f9;
+    }
+
+    .btn-danger {
+      background-color: #dc2626;
+      color: #ffffff;
+      border-color: #b91c1c;
+    }
+
+    .btn-danger:hover {
+      background-color: #b91c1c;
+    }
+
+    .btn-admin {
+      background-color: #0f766e;
+      color: #ffffff;
+      border-color: #0d9488;
+    }
+
+    .btn-admin:hover {
+      background-color: #115e59;
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    /* Table Section */
+    .table-wrapper {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .table-header-info {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .records-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .records-table th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 14px;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .records-table td {
+      padding: 12px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+      vertical-align: middle;
+    }
+
+    .records-table tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .plate-badge {
+      font-family: monospace;
+      font-weight: 700;
+      background-color: #e2e8f0;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .vin-code {
+      font-family: monospace;
+      font-size: 12px;
+      color: #475569;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .status-pending {
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .status-in-progress {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .status-completed {
+      background-color: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .status-delivered {
+      background-color: #f3e8ff;
+      color: #6b21a8;
+      border: 1px solid #e9d5ff;
+    }
+
+    .table-empty {
+      text-align: center;
+      padding: 40px 16px;
+      color: #64748b;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: #64748b;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 16px 20px;
+      border-top: 1px solid #e2e8f0;
+      background-color: #f8fafc;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-full-width {
+      grid-column: span 2;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .form-group label .required {
+      color: #dc2626;
+    }
+
+    .form-control {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .detail-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .detail-value {
+      font-size: 14px;
+      color: #0f172a;
+    }
+
+    .detail-full {
+      grid-column: span 2;
+    }
+
+    .app-footer {
+      background-color: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      padding: 14px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="navbar">
+      <div class="navbar-brand">
+        <h1>Vehicle Service Record Manager</h1>
+      </div>
+      <div class="navbar-actions">
+        <!-- Add vehicle button only visible to authenticated admin -->
+        <button id="addVehicleBtn" class="btn btn-primary" style="display: none;" onclick="openCreateModal()">+ Add New Vehicle</button>
+        <!-- Admin login / toggle button -->
+        <button id="adminLoginBtn" class="btn btn-secondary" onclick="openAdminModal()">🔒 Admin Unlock</button>
+        <button id="adminLogoutBtn" class="btn btn-secondary" style="display: none;" onclick="adminLogout()">🔓 Exit Admin</button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Status Notice Banner -->
+      <div id="roleBanner" class="role-banner">
+        <span id="roleBannerText">🌐 <strong>Public View Mode</strong>: Anyone can browse, search, and view vehicle records. Only the verified Admin can make changes.</span>
+        <button id="bannerUnlockBtn" class="btn btn-sm btn-secondary" onclick="openAdminModal()">Unlock Admin</button>
+      </div>
+
+      <div id="alertBox" class="alert">
+        <span id="alertMessage"></span>
+        <button class="alert-close" onclick="hideAlert()">&times;</button>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Total Vehicles</h3>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Pending Service</h3>
+          <div class="stat-value" id="statPending" style="color: #d97706;">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>In Progress</h3>
+          <div class="stat-value" id="statInProgress" style="color: #0284c7;">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Completed / Delivered</h3>
+          <div class="stat-value" id="statDone" style="color: #16a34a;">0</div>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="control-bar">
+        <div class="search-filters">
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search by Plate, VIN, Make, Model, or Owner..."
+            oninput="handleSearch()"
+          />
+          <select id="statusFilter" class="filter-select" onchange="loadVehicles()">
+            <option value="ALL">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary" onclick="loadVehicles()">↻ Refresh</button>
+      </div>
+
+      <!-- Records Table -->
+      <div class="table-wrapper">
+        <div class="table-header-info">
+          <span id="recordCountInfo">Loading records...</span>
+        </div>
+        <table class="records-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">ID</th>
+              <th>License Plate</th>
+              <th>Make & Model</th>
+              <th>Year</th>
+              <th>VIN</th>
+              <th>Owner & Contact</th>
+              <th>Status</th>
+              <th>Mileage</th>
+              <th style="text-align: right; padding-right: 20px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="vehicleTableBody">
+            <tr>
+              <td colspan="9" class="table-empty">Loading vehicle records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      Vehicle Management System
+    </footer>
+  </div>
+
+  <!-- Admin Passcode Modal -->
+  <div id="adminModal" class="modal-overlay">
+    <div class="modal-box" style="max-width: 400px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Admin Authentication</h2>
+        <button class="modal-close-btn" onclick="closeAdminModal()">&times;</button>
+      </div>
+      <form id="adminForm" onsubmit="handleAdminAuth(event)">
+        <div class="modal-body">
+          <p style="font-size: 13px; color: #475569; margin-bottom: 14px;">
+            Enter the Admin PIN to enable creating, editing, and deleting vehicle records.
+          </p>
+          <div id="adminModalAlert" class="alert alert-error" style="display: none; margin-bottom: 14px;"></div>
+          <div class="form-group">
+            <label>Admin PIN / Key <span class="required">*</span></label>
+            <input type="password" id="adminPinInput" class="form-control" placeholder="Enter Admin PIN" required autocomplete="current-password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeAdminModal()">Cancel</button>
+          <button type="submit" id="adminVerifyBtn" class="btn btn-primary">Unlock Admin</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Form Modal (Create / Edit) -->
+  <div id="formModal" class="modal-overlay">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="formModalTitle">Register New Vehicle</h2>
+        <button class="modal-close-btn" onclick="closeFormModal()">&times;</button>
+      </div>
+      <form id="vehicleForm" onsubmit="handleFormSubmit(event)">
+        <input type="hidden" id="editVehicleId">
+        <div class="modal-body">
+          <div id="modalAlert" class="alert alert-error" style="display: none; margin-bottom: 16px;"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>License Plate <span class="required">*</span></label>
+              <input type="text" id="licensePlate" class="form-control" placeholder="e.g. MH 02 AB 1234" required>
+            </div>
+            <div class="form-group">
+              <label>VIN (Vehicle ID) <span class="required">*</span></label>
+              <input type="text" id="vin" class="form-control" placeholder="e.g. MAT621354N1234567" required>
+            </div>
+            <div class="form-group">
+              <label>Make <span class="required">*</span></label>
+              <input type="text" id="make" class="form-control" placeholder="e.g. Tata, Hyundai, Mahindra" required>
+            </div>
+            <div class="form-group">
+              <label>Model <span class="required">*</span></label>
+              <input type="text" id="model" class="form-control" placeholder="e.g. Nexon, Creta, Thar" required>
+            </div>
+            <div class="form-group">
+              <label>Year <span class="required">*</span></label>
+              <input type="number" id="year" class="form-control" placeholder="e.g. 2023" min="1900" max="2100" required>
+            </div>
+            <div class="form-group">
+              <label>Mileage (km)</label>
+              <input type="number" id="mileage" class="form-control" placeholder="e.g. 15000" min="0">
+            </div>
+            <div class="form-group">
+              <label>Owner Full Name <span class="required">*</span></label>
+              <input type="text" id="ownerName" class="form-control" placeholder="e.g. Aarav Mehta, Ananya Roy" required>
+            </div>
+            <div class="form-group">
+              <label>Owner Contact <span class="required">*</span></label>
+              <input type="text" id="ownerContact" class="form-control" placeholder="e.g. +91 98201 14523" required>
+            </div>
+            <div class="form-group form-full-width">
+              <label>Service Status <span class="required">*</span></label>
+              <select id="serviceStatus" class="form-control" required>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Delivered">Delivered</option>
+              </select>
+            </div>
+            <div class="form-group form-full-width">
+              <label>Service Notes / Description</label>
+              <textarea id="notes" class="form-control" rows="3" placeholder="e.g. Periodic maintenance, brake pads, engine check..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeFormModal()">Cancel</button>
+          <button type="submit" id="submitBtn" class="btn btn-primary">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Details Modal -->
+  <div id="detailsModal" class="modal-overlay">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="detailsTitle">Vehicle Details</h2>
+        <button class="modal-close-btn" onclick="closeDetailsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-list">
+          <div class="detail-item">
+            <span class="detail-label">Vehicle ID</span>
+            <span class="detail-value" id="detId"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Status</span>
+            <span class="detail-value" id="detStatus"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Make & Model</span>
+            <span class="detail-value" id="detMakeModel" style="font-weight: 600;"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Manufacture Year</span>
+            <span class="detail-value" id="detYear"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">License Plate</span>
+            <span class="detail-value" id="detPlate"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">VIN Number</span>
+            <span class="detail-value vin-code" id="detVin"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Owner Name</span>
+            <span class="detail-value" id="detOwnerName"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Owner Contact</span>
+            <span class="detail-value" id="detOwnerContact"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Current Mileage</span>
+            <span class="detail-value" id="detMileage"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Registered Date</span>
+            <span class="detail-value" id="detCreated"></span>
+          </div>
+          <div class="detail-item detail-full">
+            <span class="detail-label">Service Notes / Issues</span>
+            <div id="detNotes" class="detail-value" style="background: #f8fafc; padding: 10px; border-radius: 4px; border: 1px solid #e2e8f0; margin-top: 4px; white-space: pre-wrap;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Modal -->
+  <div id="deleteModal" class="modal-overlay">
+    <div class="modal-box" style="max-width: 440px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Deletion</h2>
+        <button class="modal-close-btn" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 12px; font-size: 14px;">Are you sure you want to permanently delete this vehicle record?</p>
+        <div id="deletePreview" style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-size: 13px;"></div>
+        <p style="margin-top: 12px; font-size: 12px; color: #dc2626;">This action will permanently delete the record from MySQL.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Delete Permanently</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = '/api/vehicles';
+    let currentVehicles = [];
+    let deleteTargetId = null;
+    let searchTimeout = null;
+
+    // Admin State Management
+    function getAdminKey() {
+      return sessionStorage.getItem('vehicle_admin_pin') || '';
+    }
+
+    function isAdmin() {
+      return Boolean(getAdminKey());
+    }
+
+    function updateRoleUI() {
+      const adminActive = isAdmin();
+      const addBtn = document.getElementById('addVehicleBtn');
+      const loginBtn = document.getElementById('adminLoginBtn');
+      const logoutBtn = document.getElementById('adminLogoutBtn');
+      const roleBanner = document.getElementById('roleBanner');
+      const roleText = document.getElementById('roleBannerText');
+      const bannerUnlockBtn = document.getElementById('bannerUnlockBtn');
+
+      if (adminActive) {
+        addBtn.style.display = 'inline-flex';
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-flex';
+        roleBanner.className = 'role-banner admin-mode';
+        roleText.innerHTML = '🛡️ <strong>Admin Mode Active</strong>: You have full permissions to add, edit, and delete vehicle records.';
+        bannerUnlockBtn.style.display = 'none';
+      } else {
+        addBtn.style.display = 'none';
+        loginBtn.style.display = 'inline-flex';
+        logoutBtn.style.display = 'none';
+        roleBanner.className = 'role-banner';
+        roleText.innerHTML = '🌐 <strong>Public View Mode</strong>: Anyone can browse, search, and view vehicle records. Only the verified Admin can make changes.';
+        bannerUnlockBtn.style.display = 'inline-flex';
+      }
+
+      renderTable(currentVehicles);
+    }
+
+    function openAdminModal() {
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('adminModalAlert').style.display = 'none';
+      document.getElementById('adminModal').classList.add('active');
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.remove('active');
+    }
+
+    async function handleAdminAuth(e) {
+      e.preventDefault();
+      const pin = document.getElementById('adminPinInput').value.trim();
+      const alertBox = document.getElementById('adminModalAlert');
+      const btn = document.getElementById('adminVerifyBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      try {
+        const res = await fetch(`${API_URL}/verify-admin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pin: pin })
+        });
+        const data = await res.json();
+        if (data.valid) {
+          sessionStorage.setItem('vehicle_admin_pin', pin);
+          closeAdminModal();
+          showAlert('Admin access unlocked! You can now create, edit, and delete records.');
+          updateRoleUI();
+        } else {
+          alertBox.textContent = 'Incorrect Admin PIN. Please try again.';
+          alertBox.style.display = 'block';
+        }
+      } catch (err) {
+        alertBox.textContent = 'Error verifying PIN: ' + err.message;
+        alertBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Unlock Admin';
+      }
+    }
+
+    function adminLogout() {
+      sessionStorage.removeItem('vehicle_admin_pin');
+      showAlert('Exited Admin Mode. You are now in public view mode.', false);
+      updateRoleUI();
+    }
+
+    function getStatusBadge(status) {
+      const s = (status || '').toLowerCase();
+      let cls = 'status-pending';
+      if (s === 'in progress') cls = 'status-in-progress';
+      else if (s === 'completed') cls = 'status-completed';
+      else if (s === 'delivered') cls = 'status-delivered';
+      return `<span class="status-badge ${cls}">${status}</span>`;
+    }
+
+    function showAlert(msg, isError = false) {
+      const box = document.getElementById('alertBox');
+      const text = document.getElementById('alertMessage');
+      box.className = 'alert ' + (isError ? 'alert-error' : 'alert-success');
+      box.style.display = 'flex';
+      text.textContent = msg;
+    }
+
+    function hideAlert() {
+      document.getElementById('alertBox').style.display = 'none';
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API_URL}/stats`);
+        if (!res.ok) return;
+        const stats = await res.json();
+        document.getElementById('statTotal').textContent = stats.total || 0;
+        document.getElementById('statPending').textContent = stats.pending || 0;
+        document.getElementById('statInProgress').textContent = stats.inProgress || 0;
+        document.getElementById('statDone').textContent = (stats.completed || 0) + (stats.delivered || 0);
+      } catch (e) {
+        console.error('Stats error:', e);
+      }
+    }
+
+    async function loadVehicles() {
+      const search = document.getElementById('searchInput').value.trim();
+      const status = document.getElementById('statusFilter').value;
+      
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (status && status !== 'ALL') params.append('status', status);
+
+      const url = params.toString() ? `${API_URL}?${params.toString()}` : API_URL;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to load records from server');
+        currentVehicles = await res.json();
+        renderTable(currentVehicles);
+        loadStats();
+      } catch (err) {
+        showAlert(err.message, true);
+        renderTable([]);
+      }
+    }
+
+    function handleSearch() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(loadVehicles, 250);
+    }
+
+    function renderTable(vehicles) {
+      const tbody = document.getElementById('vehicleTableBody');
+      const countInfo = document.getElementById('recordCountInfo');
+      const adminActive = isAdmin();
+      countInfo.textContent = `Found ${vehicles.length} vehicle record${vehicles.length === 1 ? '' : 's'}`;
+
+      if (vehicles.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="table-empty"><p>No vehicle records found.</p><small>Try adjusting search or add a new vehicle.</small></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = vehicles.map(v => {
+        let actionButtonsHtml = `
+          <button class="btn btn-secondary btn-sm" onclick="viewVehicle(${v.id})">View</button>
+        `;
+
+        if (adminActive) {
+          actionButtonsHtml += `
+            <button class="btn btn-secondary btn-sm" onclick="editVehicle(${v.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${v.id})">Delete</button>
+          `;
+        }
+
+        return `
+          <tr>
+            <td>#${v.id}</td>
+            <td><span class="plate-badge">${v.licensePlate}</span></td>
+            <td><strong>${v.make}</strong> ${v.model}</td>
+            <td>${v.year}</td>
+            <td><span class="vin-code">${v.vin}</span></td>
+            <td>
+              <div>${v.ownerName}</div>
+              <small style="color: #64748b;">${v.ownerContact}</small>
+            </td>
+            <td>${getStatusBadge(v.serviceStatus)}</td>
+            <td>${v.mileage != null ? v.mileage.toLocaleString() + ' km' : '—'}</td>
+            <td style="text-align: right; padding-right: 20px;">
+              <div class="action-buttons" style="justify-content: flex-end;">
+                ${actionButtonsHtml}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openCreateModal() {
+      if (!isAdmin()) {
+        openAdminModal();
+        return;
+      }
+      document.getElementById('formModalTitle').textContent = 'Register New Vehicle';
+      document.getElementById('editVehicleId').value = '';
+      document.getElementById('vehicleForm').reset();
+      document.getElementById('year').value = new Date().getFullYear();
+      document.getElementById('modalAlert').style.display = 'none';
+      document.getElementById('submitBtn').textContent = 'Save Record';
+      document.getElementById('formModal').classList.add('active');
+    }
+
+    function editVehicle(id) {
+      if (!isAdmin()) {
+        openAdminModal();
+        return;
+      }
+      const v = currentVehicles.find(x => x.id === id);
+      if (!v) return;
+      document.getElementById('formModalTitle').textContent = 'Edit Vehicle Record';
+      document.getElementById('editVehicleId').value = v.id;
+      document.getElementById('licensePlate').value = v.licensePlate || '';
+      document.getElementById('vin').value = v.vin || '';
+      document.getElementById('make').value = v.make || '';
+      document.getElementById('model').value = v.model || '';
+      document.getElementById('year').value = v.year || new Date().getFullYear();
+      document.getElementById('mileage').value = v.mileage != null ? v.mileage : '';
+      document.getElementById('ownerName').value = v.ownerName || '';
+      document.getElementById('ownerContact').value = v.ownerContact || '';
+      document.getElementById('serviceStatus').value = v.serviceStatus || 'Pending';
+      document.getElementById('notes').value = v.notes || '';
+      document.getElementById('modalAlert').style.display = 'none';
+      document.getElementById('submitBtn').textContent = 'Update Record';
+      document.getElementById('formModal').classList.add('active');
+    }
+
+    function closeFormModal() {
+      document.getElementById('formModal').classList.remove('active');
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      if (!isAdmin()) {
+        closeFormModal();
+        openAdminModal();
+        return;
+      }
+
+      const id = document.getElementById('editVehicleId').value;
+      const modalAlert = document.getElementById('modalAlert');
+      modalAlert.style.display = 'none';
+
+      const payload = {
+        licensePlate: document.getElementById('licensePlate').value.trim().toUpperCase(),
+        vin: document.getElementById('vin').value.trim().toUpperCase(),
+        make: document.getElementById('make').value.trim(),
+        model: document.getElementById('model').value.trim(),
+        year: parseInt(document.getElementById('year').value, 10),
+        mileage: document.getElementById('mileage').value !== '' ? parseInt(document.getElementById('mileage').value, 10) : null,
+        ownerName: document.getElementById('ownerName').value.trim(),
+        ownerContact: document.getElementById('ownerContact').value.trim(),
+        serviceStatus: document.getElementById('serviceStatus').value,
+        notes: document.getElementById('notes').value.trim()
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${API_URL}/${id}` : API_URL;
+
+        const res = await fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-Key': getAdminKey()
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          const validationMsg = errData.validationErrors ? Object.values(errData.validationErrors).join(', ') : '';
+          throw new Error(validationMsg || errData.message || 'Error saving vehicle record');
+        }
+
+        closeFormModal();
+        showAlert(id ? `Vehicle "${payload.licensePlate}" updated successfully.` : `Vehicle "${payload.licensePlate}" registered successfully.`);
+        loadVehicles();
+      } catch (err) {
+        modalAlert.textContent = err.message;
+        modalAlert.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = id ? 'Update Record' : 'Save Record';
+      }
+    }
+
+    function viewVehicle(id) {
+      const v = currentVehicles.find(x => x.id === id);
+      if (!v) return;
+      document.getElementById('detailsTitle').textContent = `Vehicle Details - ${v.licensePlate}`;
+      document.getElementById('detId').textContent = '#' + v.id;
+      document.getElementById('detStatus').innerHTML = getStatusBadge(v.serviceStatus);
+      document.getElementById('detMakeModel').textContent = `${v.make} ${v.model}`;
+      document.getElementById('detYear').textContent = v.year;
+      document.getElementById('detPlate').innerHTML = `<span class="plate-badge">${v.licensePlate}</span>`;
+      document.getElementById('detVin').textContent = v.vin;
+      document.getElementById('detOwnerName').textContent = v.ownerName;
+      document.getElementById('detOwnerContact').textContent = v.ownerContact;
+      document.getElementById('detMileage').textContent = v.mileage != null ? `${v.mileage.toLocaleString()} km` : 'Not recorded';
+      document.getElementById('detCreated').textContent = v.createdAt ? new Date(v.createdAt).toLocaleString() : 'N/A';
+      document.getElementById('detNotes').textContent = v.notes || 'No additional service notes recorded.';
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function closeDetailsModal() {
+      document.getElementById('detailsModal').classList.remove('active');
+    }
+
+    function openDeleteModal(id) {
+      if (!isAdmin()) {
+        openAdminModal();
+        return;
+      }
+      const v = currentVehicles.find(x => x.id === id);
+      if (!v) return;
+      deleteTargetId = id;
+      document.getElementById('deletePreview').innerHTML = `
+        <strong>${v.make} ${v.model} (${v.year})</strong><br>
+        License Plate: <span class="plate-badge">${v.licensePlate}</span><br>
+        Owner: ${v.ownerName}
+      `;
+      document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('active');
+      deleteTargetId = null;
+    }
+
+    async function confirmDelete() {
+      if (!deleteTargetId) return;
+      const btn = document.getElementById('confirmDeleteBtn');
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+
+      try {
+        const res = await fetch(`${API_URL}/${deleteTargetId}`, {
+          method: 'DELETE',
+          headers: {
+            'X-Admin-Key': getAdminKey()
+          }
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || 'Failed to delete vehicle record');
+        }
+        closeDeleteModal();
+        showAlert('Vehicle record deleted permanently.');
+        loadVehicles();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Delete Permanently';
+      }
+    }
+
+    // Initialize on page load
+    updateRoleUI();
+    loadVehicles();
+  </script>
+</body>
+</html>
